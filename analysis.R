@@ -1,5 +1,4 @@
 library(tidyverse)
-library(magrittr)
 library(cluster)
 library(factoextra)
 library(caret)
@@ -38,8 +37,6 @@ fit_rf$finalModel
 #fit metrics
 train_predict<- predict(fit_rf,traind)
 test_predict<- predict(fit_rf,testd)
-#traind$outcome <- factor(traind$outcome)
-#testd$outcome <- factor(testd$outcome)
 results_train <- confusionMatrix(train_predict, as.factor(traind$outcome))
 results_test <- confusionMatrix(test_predict, as.factor(testd$outcome))
 acc_train <- round(as.numeric(results_train$overall[1])*100,2)
@@ -55,11 +52,24 @@ varImportanceScores <- arrange(varImportanceScores,desc(var_imp_scores))
 train_features <- traind %>% select(- outcome)
 k2 <- kmeans(train_features, centers = 3, nstart = 25)
 fviz_cluster(k2, data = traind)
+#visualize optimal nr of clusters mimizing within cluster sum of squares metric
 set.seed(123)
 fviz_nbclust(train_features, kmeans, method = "wss")
+
+# rename columns from 1 to Cluster 1
+rename_cluster_col = function(df){
+  for (i in 2:ncol(df)){
+    colnames(df)[i] = paste0('cluster',(i-1))}
+  df}
 
 # Summarize features per cluster
 summary_cluster <- traind %>%
   mutate(Cluster = k2$cluster) %>%
   group_by(Cluster) %>%
-  summarise_all("mean")
+  summarise_all("mean") %>%
+  gather(variable,value, -Cluster ) %>%
+  spread (Cluster,value) %>%
+  rename_cluster_col()
+
+
+

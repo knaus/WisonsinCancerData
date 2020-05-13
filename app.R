@@ -31,6 +31,12 @@ varImportanceScores <- data.frame(varImportance$importance)
 varImportanceScores <- data.frame(Name = row.names(varImportanceScores), Score = varImportanceScores$Overall)
 varImportanceScores <- arrange(varImportanceScores,desc(Score))
 train_features <- traind %>% select(- outcome)
+# rename columns from 1 to Cluster 1
+rename_cluster_col = function(df){
+    for (i in 2:ncol(df)){
+        colnames(df)[i] = paste0('cluster',(i-1))}
+    df}
+
 
 ui <- fluidPage(
     
@@ -75,15 +81,18 @@ server <- function(input, output, session) {
     output$oob <- renderText(paste(oob,"%"))
     output$feature_importance <- renderTable(varImportanceScores)
     output$confusion_matrix <- renderTable (results_test$table)
-    #cluster teh training data 
+    #cluster the training data 
     k <- reactive(input$clusters)
     kclusters <- reactive(kmeans(train_features, centers = k(), nstart = 25))
     output$cluster_plot <- renderPlot(fviz_cluster(kclusters(), data = train_features)+xlab('PCA dim 1')+ylab('PCA dim 2'))
     #summarize features per cluster
-    summary_cluster<- reactive({traind %>%
+    summary_cluster <- reactive({traind %>%
         mutate(Cluster = kclusters()$cluster) %>%
         group_by(Cluster) %>%
-        summarise_all("mean")})
+        summarise_all("mean") %>%
+        gather(variable,value, -Cluster ) %>%
+        spread (Cluster,value) %>%
+        rename_cluster_col})
     output$summary <- renderTable(summary_cluster())
 }
 
