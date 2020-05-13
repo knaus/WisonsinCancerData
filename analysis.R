@@ -3,7 +3,7 @@ library(cluster)
 library(factoextra)
 library(caret)
 
-# # Get data
+# First pass data preparation
 # names <- c('id_number', 'clump_thickness', 'uniform_cell_size', 'uniform_cell_shape', 'marginal_adhesion', 'single_epithelial_cell_size', 'bare_nuclei', 'bland_chromatin', 'normal_nucleoli', 'mitoses','diagnosis')
 # data <- read.csv('breast-cancer-wisconsin.data',header=FALSE,col.names=names)
 # # Data cleaning
@@ -56,13 +56,13 @@ fviz_cluster(k2, data = traind)
 set.seed(123)
 fviz_nbclust(train_features, kmeans, method = "wss")
 
-# rename columns from 1 to Cluster 1
+#rename columns from 1 to Cluster 1
 rename_cluster_col = function(df){
   for (i in 2:ncol(df)){
     colnames(df)[i] = paste0('cluster',(i-1))}
   df}
 
-# Summarize features per cluster
+#summarize features per cluster
 summary_cluster <- traind %>%
   mutate(Cluster = k2$cluster) %>%
   group_by(Cluster) %>%

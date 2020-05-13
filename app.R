@@ -1,9 +1,6 @@
 library(shiny)
 library(shinydashboard)
-library(shinyWidgets)
-library(tidyverse)
 library(dplyr)
-library(magrittr)
 library(caret)
 library(factoextra)
 
