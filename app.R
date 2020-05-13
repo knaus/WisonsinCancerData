@@ -3,6 +3,7 @@ library(shinydashboard)
 library(dplyr)
 library(caret)
 library(factoextra)
+library(randomForest)
 
 #---build model--------------------------------------------------------
 data <- read.csv('breast-cancer-wisconsin-cleaned.csv', header=TRUE)
